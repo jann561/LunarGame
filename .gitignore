@@ -10,6 +10,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 /[Pp]rojectSettings/
+/[Pp]ackages/
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
