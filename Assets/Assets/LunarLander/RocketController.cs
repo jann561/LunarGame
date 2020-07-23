@@ -27,6 +27,8 @@ public class RocketController : MonoBehaviour
         {
             RocketForce = RocketForce + Time.deltaTime * 6;
         }
+
+        //Apply gravity
         RocketForce = RocketForce - Time.deltaTime * 4;
 
         r.AddForce(Physics.gravity/4);
