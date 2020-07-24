@@ -9,6 +9,7 @@ public class RocketController : MonoBehaviour
     public float Speed;
     public float AngularSpeed;
     public float RocketForce;
+    public float RotationSpeed;
     protected Rigidbody r;
 
     // Start is called before the first frame update
@@ -23,6 +24,8 @@ public class RocketController : MonoBehaviour
         Speed = r.velocity.magnitude;
         AngularSpeed = r.angularVelocity.magnitude;
 
+        //If boots is pressed add force
+        //Else remove force
         if (Input.GetButton("Jump"))
         {
             RocketForce = RocketForce + Time.deltaTime * 6;
@@ -31,15 +34,24 @@ public class RocketController : MonoBehaviour
                 RocketForce = RocketForce + Time.deltaTime * 50;
             }
         }
+        else
+        {
+            RocketForce = RocketForce - Time.deltaTime * 20;
+        }
 
-        //Auto reduce RocketForce variable and limit to >0
-        //Apply Gravity force and Rocket force
-        RocketForce = RocketForce - Time.deltaTime * 4;
+        //Rotate ship
+        if (Input.GetAxis("Horizontal") != 0)
+        {
+            r.AddRelativeTorque(0, 0, -1 * (Input.GetAxis("Horizontal") * RotationSpeed), mode:ForceMode.Acceleration);
+        }
+
+        //Limit RocketForce to >0
         if (RocketForce < 0)
         {
             RocketForce = 0;
         }
 
+        //Apply Gravity force and Rocket force
         r.AddForce(Physics.gravity/4);
         r.AddForce(0, (RocketForce/4), 0);
     }
