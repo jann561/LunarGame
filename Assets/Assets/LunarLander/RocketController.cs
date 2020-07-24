@@ -26,10 +26,19 @@ public class RocketController : MonoBehaviour
         if (Input.GetButton("Jump"))
         {
             RocketForce = RocketForce + Time.deltaTime * 6;
+            if (RocketForce < 9.81f)
+            {
+                RocketForce = RocketForce + Time.deltaTime * 50;
+            }
         }
 
-        //Apply gravity
+        //Auto reduce RocketForce variable and limit to >0
+        //Apply Gravity force and Rocket force
         RocketForce = RocketForce - Time.deltaTime * 4;
+        if (RocketForce < 0)
+        {
+            RocketForce = 0;
+        }
 
         r.AddForce(Physics.gravity/4);
         r.AddForce(0, (RocketForce/4), 0);
