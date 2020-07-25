@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading;
@@ -10,24 +11,37 @@ public class RocketController : MonoBehaviour
     public float AngularSpeed;
     public float RocketForce;
     public float RotationSpeed;
+    public float Fuel;
+    private float relative_direction;
     protected Rigidbody r;
-    public ParticleSystem thruster1;
+    private float emission_rate;
+    private Transform self_transform;
+    private Transform thruster1;
+    private ParticleSystem thruster1p;
     private ParticleSystem.EmissionModule thruster1_emission;
-    public ParticleSystem thruster2;
+    private Transform thruster2;
+    private ParticleSystem thruster2p;
     private ParticleSystem.EmissionModule thruster2_emission;
-    public ParticleSystem thruster3;
+    private Transform thruster3;
+    private ParticleSystem thruster3p;
     private ParticleSystem.EmissionModule thruster3_emission;
-    public ParticleSystem thruster4;
+    private Transform thruster4;
+    private ParticleSystem thruster4p;
     private ParticleSystem.EmissionModule thruster4_emission;
 
     // Start is called before the first frame update
     void Start()
     {
         r = GetComponent<Rigidbody>();
-        thruster1 = this.transform.Find("Thruster1").GetComponent<ParticleSystem>();
-        thruster2 = this.transform.Find("Thruster2").GetComponent<ParticleSystem>();
-        thruster3 = this.transform.Find("Thruster3").GetComponent<ParticleSystem>();
-        thruster4 = this.transform.Find("Thruster4").GetComponent<ParticleSystem>();
+        self_transform = this.transform;
+        thruster1 = self_transform.Find("Thruster1");
+        thruster1p = thruster1.GetComponent<ParticleSystem>();
+        thruster2 = self_transform.Find("Thruster2");
+        thruster2p = thruster2.GetComponent<ParticleSystem>();
+        thruster3 = self_transform.Find("Thruster3");
+        thruster3p = thruster3.GetComponent<ParticleSystem>();
+        thruster4 = self_transform.Find("Thruster4");
+        thruster4p = thruster4.GetComponent<ParticleSystem>();
     }
 
     // Update is called once per frame
@@ -38,7 +52,7 @@ public class RocketController : MonoBehaviour
 
         //If boots is pressed add force
         //Else remove force
-        if (Input.GetButton("Jump"))
+        if (Input.GetButton("Jump") && (Fuel > 0))
         {
             RocketForce = RocketForce + Time.deltaTime * 6;
             if (RocketForce < 9.81f)
@@ -50,19 +64,30 @@ public class RocketController : MonoBehaviour
         {
             RocketForce = RocketForce - Time.deltaTime * 20;
         }
-        thruster1_emission = thruster1.emission;
-        thruster1_emission.rateOverTime = RocketForce;
-        thruster2_emission = thruster2.emission;
-        thruster2_emission.rateOverTime = RocketForce;
-        thruster3_emission = thruster3.emission;
-        thruster3_emission.rateOverTime = RocketForce;
-        thruster4_emission = thruster4.emission;
-        thruster4_emission.rateOverTime = RocketForce;
+        emission_rate = 10f;
+        thruster1_emission = thruster1p.emission;
+        thruster1_emission.rateOverTime = RocketForce * emission_rate;
+        thruster2_emission = thruster2p.emission;
+        thruster2_emission.rateOverTime = RocketForce * emission_rate;
+        thruster3_emission = thruster3p.emission;
+        thruster3_emission.rateOverTime = RocketForce * emission_rate;
+        thruster4_emission = thruster4p.emission;
+        thruster4_emission.rateOverTime = RocketForce * emission_rate;
+
+        //Reduce fuel when boosting
+        Fuel = Fuel - Time.deltaTime * RocketForce / 4;
 
         //Rotate ship
         if (Input.GetAxis("Horizontal") != 0)
         {
-            r.AddRelativeTorque(0, 0, -1 * (Input.GetAxis("Horizontal") * RotationSpeed), mode:ForceMode.Acceleration);
+            relative_direction = (relative_direction + Input.GetAxis("Horizontal") / 4);
+            relative_direction = Math.Min(relative_direction, 45f);
+            relative_direction = Math.Max(relative_direction, -45f);
+
+            thruster1.eulerAngles = new Vector3(0f, 0f, -1 * relative_direction);
+            thruster2.eulerAngles = new Vector3(0f, 0f, -1 * relative_direction);
+            thruster3.eulerAngles = new Vector3(0f, 0f, -1 * relative_direction);
+            thruster4.eulerAngles = new Vector3(0f, 0f, -1 * relative_direction);
         }
 
         //Limit RocketForce to >0
@@ -73,6 +98,6 @@ public class RocketController : MonoBehaviour
 
         //Apply Gravity force and Rocket force
         r.AddForce(Physics.gravity/4);
-        r.AddForce(0, (RocketForce/4), 0);
+        r.AddForce((RocketForce / 4 * (1 * (relative_direction / 45))), (RocketForce / 4 * (1 - (Mathf.Abs(relative_direction)/45))), 0);
     }
 }
