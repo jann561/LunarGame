@@ -54,7 +54,7 @@ public class RocketController : MonoBehaviour
         //Else remove force
         if (Input.GetButton("Jump") && (Fuel > 0))
         {
-            RocketForce = RocketForce + Time.deltaTime * 6;
+            RocketForce = RocketForce + Time.deltaTime * 10;
             if (RocketForce < 9.81f)
             {
                 RocketForce = RocketForce + Time.deltaTime * 50;
@@ -62,7 +62,7 @@ public class RocketController : MonoBehaviour
         }
         else
         {
-            RocketForce = RocketForce - Time.deltaTime * 20;
+            RocketForce = Math.Max((RocketForce - Time.deltaTime * 50),0);
         }
         emission_rate = 10f;
         thruster1_emission = thruster1p.emission;
@@ -75,7 +75,7 @@ public class RocketController : MonoBehaviour
         thruster4_emission.rateOverTime = RocketForce * emission_rate;
 
         //Reduce fuel when boosting
-        Fuel = Fuel - Time.deltaTime * RocketForce / 4;
+        Fuel = Math.Max((Fuel - Time.deltaTime * RocketForce / 4),0);
 
         //Rotate ship
         if (Input.GetAxis("Horizontal") != 0)
