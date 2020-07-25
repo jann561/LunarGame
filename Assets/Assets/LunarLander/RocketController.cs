@@ -11,11 +11,23 @@ public class RocketController : MonoBehaviour
     public float RocketForce;
     public float RotationSpeed;
     protected Rigidbody r;
+    public ParticleSystem thruster1;
+    private ParticleSystem.EmissionModule thruster1_emission;
+    public ParticleSystem thruster2;
+    private ParticleSystem.EmissionModule thruster2_emission;
+    public ParticleSystem thruster3;
+    private ParticleSystem.EmissionModule thruster3_emission;
+    public ParticleSystem thruster4;
+    private ParticleSystem.EmissionModule thruster4_emission;
 
     // Start is called before the first frame update
     void Start()
     {
         r = GetComponent<Rigidbody>();
+        thruster1 = this.transform.Find("Thruster1").GetComponent<ParticleSystem>();
+        thruster2 = this.transform.Find("Thruster2").GetComponent<ParticleSystem>();
+        thruster3 = this.transform.Find("Thruster3").GetComponent<ParticleSystem>();
+        thruster4 = this.transform.Find("Thruster4").GetComponent<ParticleSystem>();
     }
 
     // Update is called once per frame
@@ -38,6 +50,14 @@ public class RocketController : MonoBehaviour
         {
             RocketForce = RocketForce - Time.deltaTime * 20;
         }
+        thruster1_emission = thruster1.emission;
+        thruster1_emission.rateOverTime = RocketForce;
+        thruster2_emission = thruster2.emission;
+        thruster2_emission.rateOverTime = RocketForce;
+        thruster3_emission = thruster3.emission;
+        thruster3_emission.rateOverTime = RocketForce;
+        thruster4_emission = thruster4.emission;
+        thruster4_emission.rateOverTime = RocketForce;
 
         //Rotate ship
         if (Input.GetAxis("Horizontal") != 0)
