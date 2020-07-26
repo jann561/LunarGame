@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class RocketController : MonoBehaviour
 {
+    private const float SafeSpeedThreshold = 15f;
     public float Speed;
     public float AngularSpeed;
     public float RocketForce;
@@ -15,7 +16,7 @@ public class RocketController : MonoBehaviour
     private float Fuel;
     public Slider slider;
     private float relative_direction;
-    protected Rigidbody r;
+    protected Rigidbody rigid_body;
     private float emission_rate;
     private Transform self_transform;
     private Transform thruster1;
@@ -31,10 +32,12 @@ public class RocketController : MonoBehaviour
     private ParticleSystem thruster4p;
     private ParticleSystem.EmissionModule thruster4_emission;
 
+    private CanvasGroup crash_overlay;
+
     // Start is called before the first frame update
     void Start()
     {
-        r = GetComponent<Rigidbody>();
+        rigid_body = GetComponent<Rigidbody>();
         self_transform = this.transform;
         slider = self_transform.Find("Canvas").Find("Slider").GetComponent<Slider>();
         thruster1 = self_transform.Find("Thruster1");
@@ -46,14 +49,18 @@ public class RocketController : MonoBehaviour
         thruster4 = self_transform.Find("Thruster4");
         thruster4p = thruster4.GetComponent<ParticleSystem>();
 
+        crash_overlay = self_transform.Find("Canvas").Find("CrashDisplay").GetComponent<CanvasGroup>();
+        crash_overlay.alpha = 0;
+        crash_overlay.interactable = false;
+
         Fuel = 100;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Speed = r.velocity.magnitude;
-        AngularSpeed = r.angularVelocity.magnitude;
+        Speed = rigid_body.velocity.magnitude;
+        AngularSpeed = rigid_body.angularVelocity.magnitude;
 
         //If boots is pressed add force
         //Else remove force
@@ -104,7 +111,25 @@ public class RocketController : MonoBehaviour
         }
 
         //Apply Gravity force and Rocket force
-        r.AddForce(Physics.gravity/4);
-        r.AddForce((RocketForce / 4 * (1 * (relative_direction / 45))), (RocketForce / 4 * (1 - (Mathf.Abs(relative_direction)/45))), 0);
+        rigid_body.AddForce(Physics.gravity/4);
+        rigid_body.AddForce((RocketForce / 4 * (1 * (relative_direction / 45))), (RocketForce / 4 * (1 - (Mathf.Abs(relative_direction)/45))), 0);
+    }
+
+    //Check for at landing position
+    private void OnTriggerEnter(Collider other)
+    {
+        if (Speed < SafeSpeedThreshold)
+        {
+            Fuel = 100;
+        }
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (Speed > SafeSpeedThreshold)
+        {
+            crash_overlay.alpha = 1;
+            crash_overlay.interactable = true;
+        }
     }
 }
