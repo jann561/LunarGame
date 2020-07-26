@@ -66,7 +66,7 @@ public class RocketController : MonoBehaviour
         //Else remove force
         if (Input.GetButton("Jump") && (Fuel > 0))
         {
-            RocketForce = RocketForce + Time.deltaTime * 10;
+            RocketForce = Math.Min((RocketForce + Time.deltaTime * 15), 30);
             if (RocketForce < 9.81f)
             {
                 RocketForce = RocketForce + Time.deltaTime * 50;
@@ -130,6 +130,7 @@ public class RocketController : MonoBehaviour
         {
             crash_overlay.alpha = 1;
             crash_overlay.interactable = true;
+            Fuel = 0;
         }
     }
 }
