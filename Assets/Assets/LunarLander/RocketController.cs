@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RocketController : MonoBehaviour
 {
@@ -11,7 +12,8 @@ public class RocketController : MonoBehaviour
     public float AngularSpeed;
     public float RocketForce;
     public float RotationSpeed;
-    public float Fuel;
+    private float Fuel;
+    public Slider slider;
     private float relative_direction;
     protected Rigidbody r;
     private float emission_rate;
@@ -34,6 +36,7 @@ public class RocketController : MonoBehaviour
     {
         r = GetComponent<Rigidbody>();
         self_transform = this.transform;
+        slider = self_transform.Find("Canvas").Find("Slider").GetComponent<Slider>();
         thruster1 = self_transform.Find("Thruster1");
         thruster1p = thruster1.GetComponent<ParticleSystem>();
         thruster2 = self_transform.Find("Thruster2");
@@ -42,6 +45,8 @@ public class RocketController : MonoBehaviour
         thruster3p = thruster3.GetComponent<ParticleSystem>();
         thruster4 = self_transform.Find("Thruster4");
         thruster4p = thruster4.GetComponent<ParticleSystem>();
+
+        Fuel = 100;
     }
 
     // Update is called once per frame
@@ -76,6 +81,8 @@ public class RocketController : MonoBehaviour
 
         //Reduce fuel when boosting
         Fuel = Math.Max((Fuel - Time.deltaTime * RocketForce / 4),0);
+        slider.value = (Fuel / 100);
+
 
         //Rotate ship
         if (Input.GetAxis("Horizontal") != 0)
