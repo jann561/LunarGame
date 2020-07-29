@@ -18,6 +18,7 @@ public class RocketController : MonoBehaviour
     private float relative_direction;
     protected Rigidbody rigid_body;
     private float emission_rate;
+    private bool game_over;
     private Transform self_transform;
     private Transform thruster1;
     private ParticleSystem thruster1p;
@@ -33,6 +34,8 @@ public class RocketController : MonoBehaviour
     private ParticleSystem.EmissionModule thruster4_emission;
 
     private CanvasGroup crash_overlay;
+    private CanvasGroup win_overlay;
+    private CanvasGroup nofuel_overlay;
 
     // Start is called before the first frame update
     void Start()
@@ -53,7 +56,16 @@ public class RocketController : MonoBehaviour
         crash_overlay.alpha = 0;
         crash_overlay.interactable = false;
 
-        Fuel = 100;
+        win_overlay = self_transform.Find("Canvas").Find("WinDisplay").GetComponent<CanvasGroup>();
+        win_overlay.alpha = 0;
+        win_overlay.interactable = false;
+
+        nofuel_overlay = self_transform.Find("Canvas").Find("NoFuelDisplay").GetComponent<CanvasGroup>();
+        nofuel_overlay.alpha = 0;
+        nofuel_overlay.interactable = false;
+
+        Fuel = 40;
+        game_over = false;
     }
 
     // Update is called once per frame
@@ -88,7 +100,7 @@ public class RocketController : MonoBehaviour
 
         //Reduce fuel when boosting
         Fuel = Math.Max((Fuel - Time.deltaTime * RocketForce / 4),0);
-        slider.value = (Fuel / 100);
+        slider.value = (Fuel / 40);
 
 
         //Rotate ship
@@ -113,6 +125,23 @@ public class RocketController : MonoBehaviour
         //Apply Gravity force and Rocket force
         rigid_body.AddForce(Physics.gravity/4);
         rigid_body.AddForce((RocketForce / 4 * (1 * (relative_direction / 45))), (RocketForce / 4 * (1 - (Mathf.Abs(relative_direction)/45))), 0);
+
+        if (Fuel == 0)
+        {
+            if (game_over == false)
+            {
+                nofuel_overlay.alpha = 1;
+                nofuel_overlay.interactable = true;
+                game_over = true;
+                nofuel_overlay.enabled = true;
+                win_overlay.enabled = true;
+                crash_overlay.enabled = true;
+
+                nofuel_overlay.blocksRaycasts = true;
+                win_overlay.blocksRaycasts = false;
+                crash_overlay.blocksRaycasts = false;
+            }
+        }
     }
 
     //Check for at landing position
@@ -120,7 +149,20 @@ public class RocketController : MonoBehaviour
     {
         if (Speed < SafeSpeedThreshold)
         {
-            Fuel = 100;
+            if (game_over == false)
+            {
+                win_overlay.alpha = 1;
+                win_overlay.interactable = true;
+                game_over = true;
+                Fuel = 0;
+                nofuel_overlay.enabled = true;
+                win_overlay.enabled = true;
+                crash_overlay.enabled = true;
+
+                nofuel_overlay.blocksRaycasts = false;
+                win_overlay.blocksRaycasts = true;
+                crash_overlay.blocksRaycasts = false;
+            }
         }
     }
 
@@ -128,9 +170,19 @@ public class RocketController : MonoBehaviour
     {
         if (Speed > SafeSpeedThreshold)
         {
-            crash_overlay.alpha = 1;
-            crash_overlay.interactable = true;
-            Fuel = 0;
+            if (game_over == false)
+            {
+                crash_overlay.alpha = 1;
+                crash_overlay.interactable = true;
+                game_over = true;
+                Fuel = 0;
+                nofuel_overlay.enabled = true;
+                win_overlay.enabled = true;
+                crash_overlay.enabled = true;
+                nofuel_overlay.blocksRaycasts = false;
+                win_overlay.blocksRaycasts = false;
+                crash_overlay.blocksRaycasts = true;
+            }
         }
     }
 }
